@@ -3,6 +3,7 @@ package br.com.sistemas.chamados.exception;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -28,6 +29,12 @@ public class GlobalExceptionHandler {
             .map(e -> e.getField() + ": " + e.getDefaultMessage())
             .toList();
         return montar(HttpStatus.BAD_REQUEST, "Dados inválidos", detalhes);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErroResposta> integridade(DataIntegrityViolationException ex) {
+        return montar(HttpStatus.CONFLICT,
+            "Operação viola a integridade dos dados (registro em uso por outro recurso)", List.of());
     }
 
     private ResponseEntity<ErroResposta> montar(
