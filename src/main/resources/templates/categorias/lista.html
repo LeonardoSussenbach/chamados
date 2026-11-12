@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head th:replace="~{fragments/layout :: head('Categorias')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('categorias')}"></header>
+
+<main class="container">
+    <div th:replace="~{fragments/layout :: alertas}"></div>
+
+    <div class="cabecalho">
+        <h1>Categorias</h1>
+        <a class="btn" th:href="@{/app/categorias/novo}">+ Nova categoria</a>
+    </div>
+
+    <div class="card tabela-wrap">
+        <table>
+            <thead>
+            <tr><th>Nome</th><th>Descrição</th><th></th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="c : ${categorias}">
+                <td th:text="${c.nome()}">Nome</td>
+                <td th:text="${c.descricao() ?: '—'}">Descrição</td>
+                <td class="acoes">
+                    <a class="btn secundario pequeno" th:href="@{/app/categorias/{id}/editar(id=${c.id()})}">Editar</a>
+                    <form class="inline" method="post" th:action="@{/app/categorias/{id}/excluir(id=${c.id()})}"
+                          onsubmit="return confirm('Excluir esta categoria?')">
+                        <button type="submit" class="btn perigo pequeno">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(categorias)}">
+                <td colspan="3" class="vazio">Nenhuma categoria cadastrada.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+</body>
+</html>

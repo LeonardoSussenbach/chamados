@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head th:replace="~{fragments/layout :: head('Chamado #' + ${chamado.id()})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('chamados')}"></header>
+
+<main class="container" th:with="fechado=${chamado.status().name() == 'FECHADO'}">
+    <div th:replace="~{fragments/layout :: alertas}"></div>
+
+    <div class="cabecalho">
+        <div>
+            <h1 th:text="${chamado.titulo()}">Título</h1>
+            <p class="subtitulo">
+                <span th:text="'Chamado #' + ${chamado.id()}">Chamado #1</span> ·
+                <span th:replace="~{fragments/layout :: status(${chamado.status()})}"></span>
+                <span th:replace="~{fragments/layout :: prioridade(${chamado.prioridade()})}"></span>
+            </p>
+        </div>
+        <a class="btn secundario" th:href="@{/app/chamados}">‹ Voltar</a>
+    </div>
+
+    <div class="card">
+        <dl class="dados">
+            <div><dt>Cliente</dt>
+                <dd><a th:href="@{/app/clientes/{id}(id=${chamado.clienteId()})}" th:text="${chamado.clienteNome()}">Cliente</a></dd></div>
+            <div><dt>Categoria</dt><dd th:text="${chamado.categoriaNome()}">Categoria</dd></div>
+            <div><dt>Técnico</dt><dd th:text="${chamado.tecnicoNome() ?: 'Não atribuído'}">Técnico</dd></div>
+            <div><dt>Abertura</dt>
+                <dd th:text="${#temporals.format(chamado.dataAbertura(), 'dd/MM/yyyy HH:mm')}">--</dd></div>
+            <div><dt>Fechamento</dt>
+                <dd th:text="${chamado.dataFechamento() != null} ? ${#temporals.format(chamado.dataFechamento(), 'dd/MM/yyyy HH:mm')} : '—'">--</dd></div>
+        </dl>
+        <hr style="border:0;border-top:1px solid var(--borda);margin:16px 0">
+        <p class="descricao" th:text="${chamado.descricao()}">Descrição</p>
+    </div>
+
+    <div class="alerta sucesso" th:if="${fechado}">
+        Este chamado está fechado. Status e técnico não podem mais ser alterados.
+    </div>
+
+    <div class="grade" th:unless="${fechado}">
+        <form class="card" method="post" th:action="@{/app/chamados/{id}/status(id=${chamado.id()})}">
+            <h2>Alterar status</h2>
+            <div class="campo">
+                <select name="status" aria-label="Novo status">
+                    <option th:each="s : ${proximosStatus}" th:value="${s}"
+                            th:text="${#strings.replace(s, '_', ' ')}"></option>
+                </select>
+            </div>
+            <button type="submit" class="btn">Alterar status</button>
+        </form>
+
+        <form class="card" method="post" th:action="@{/app/chamados/{id}/atribuir(id=${chamado.id()})}">
+            <h2>Atribuir técnico</h2>
+            <div class="campo">
+                <select name="tecnicoId" aria-label="Técnico">
+                    <option value="">Selecione...</option>
+                    <option th:each="t : ${tecnicos}" th:value="${t.id()}"
+                            th:text="${t.nome()} + ' (' + ${t.perfil()} + ')'"
+                            th:selected="${t.id() == chamado.tecnicoId()}"></option>
+                </select>
+            </div>
+            <button type="submit" class="btn">Atribuir</button>
+        </form>
+    </div>
+
+    <div class="card" id="comentarios">
+        <h2 th:text="'Comentários (' + ${#lists.size(comentarios)} + ')'">Comentários</h2>
+
+        <div class="comentario" th:each="c : ${comentarios}">
+            <div class="meta">
+                <strong th:text="${c.autor()}">Autor</strong> ·
+                <span th:text="${#temporals.format(c.data(), 'dd/MM/yyyy HH:mm')}">data</span>
+            </div>
+            <p th:text="${c.texto()}">Texto</p>
+        </div>
+        <p class="vazio" th:if="${#lists.isEmpty(comentarios)}">Nenhum comentário ainda.</p>
+
+        <form class="form" method="post" th:action="@{/app/chamados/{id}/comentarios(id=${chamado.id()})}"
+              style="margin-top:16px">
+            <div class="campo" th:classappend="${erros['autor']} ? 'invalido'">
+                <label for="autor">Autor</label>
+                <input type="text" id="autor" name="autor" maxlength="100" th:value="${comentarioForm.autor()}">
+                <small class="campo-erro" th:if="${erros['autor']}" th:text="${erros['autor']}"></small>
+            </div>
+            <div class="campo" th:classappend="${erros['texto']} ? 'invalido'">
+                <label for="texto">Comentário</label>
+                <textarea id="texto" name="texto" maxlength="2000" th:text="${comentarioForm.texto()}"></textarea>
+                <small class="campo-erro" th:if="${erros['texto']}" th:text="${erros['texto']}"></small>
+            </div>
+            <button type="submit" class="btn">Registrar comentário</button>
+        </form>
+    </div>
+</main>
+</body>
+</html>
