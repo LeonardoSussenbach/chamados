@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head th:replace="~{fragments/layout :: head(${cliente.nome()})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('clientes')}"></header>
+
+<main class="container">
+    <div th:replace="~{fragments/layout :: alertas}"></div>
+
+    <div class="cabecalho">
+        <div>
+            <h1 th:text="${cliente.nome()}">Cliente</h1>
+            <p class="subtitulo" th:text="'Cliente #' + ${cliente.id()}">Cliente #1</p>
+        </div>
+        <div class="botoes">
+            <a class="btn" th:href="@{/app/chamados/novo(clienteId=${cliente.id()})}">+ Abrir chamado</a>
+            <a class="btn secundario" th:href="@{/app/clientes/{id}/editar(id=${cliente.id()})}">Editar</a>
+            <form class="inline" method="post" th:action="@{/app/clientes/{id}/excluir(id=${cliente.id()})}"
+                  onsubmit="return confirm('Excluir este cliente?')">
+                <button type="submit" class="btn perigo">Excluir</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <dl class="dados">
+            <div><dt>E-mail</dt><dd th:text="${cliente.email()}">email</dd></div>
+            <div><dt>Telefone</dt><dd th:text="${cliente.telefone() ?: '—'}">telefone</dd></div>
+            <div><dt>Chamados</dt><dd th:text="${chamados.totalElements}">0</dd></div>
+        </dl>
+    </div>
+
+    <div class="card">
+        <h2>Chamados do cliente</h2>
+        <div class="tabela-wrap">
+            <table>
+                <thead>
+                <tr><th>#</th><th>Título</th><th>Categoria</th><th>Prioridade</th><th>Status</th><th>Abertura</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="c : ${chamados.content}">
+                    <td th:text="${c.id()}">1</td>
+                    <td><a th:href="@{/app/chamados/{id}(id=${c.id()})}" th:text="${c.titulo()}">Título</a></td>
+                    <td th:text="${c.categoriaNome()}">Categoria</td>
+                    <td><span th:replace="~{fragments/layout :: prioridade(${c.prioridade()})}"></span></td>
+                    <td><span th:replace="~{fragments/layout :: status(${c.status()})}"></span></td>
+                    <td th:text="${#temporals.format(c.dataAbertura(), 'dd/MM/yyyy HH:mm')}">--</td>
+                </tr>
+                <tr th:if="${chamados.empty}">
+                    <td colspan="6" class="vazio">Este cliente ainda não abriu chamados.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="paginacao" th:if="${chamados.totalPages > 1}">
+            <a class="btn secundario pequeno" th:if="${chamados.hasPrevious()}"
+               th:href="@{/app/clientes/{id}(id=${cliente.id()},page=${chamados.number - 1})}">‹ Anterior</a>
+            <span class="info" th:text="'Página ' + ${chamados.number + 1} + ' de ' + ${chamados.totalPages}"></span>
+            <a class="btn secundario pequeno" th:if="${chamados.hasNext()}"
+               th:href="@{/app/clientes/{id}(id=${cliente.id()},page=${chamados.number + 1})}">Próxima ›</a>
+        </div>
+    </div>
+</main>
+</body>
+</html>

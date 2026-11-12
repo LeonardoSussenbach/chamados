@@ -4,13 +4,17 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-@RestControllerAdvice
+@RestControllerAdvice(annotations = RestController.class)
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(RecursoNaoEncontradoException.class)
@@ -29,6 +33,23 @@ public class GlobalExceptionHandler {
             .map(e -> e.getField() + ": " + e.getDefaultMessage())
             .toList();
         return montar(HttpStatus.BAD_REQUEST, "Dados inválidos", detalhes);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErroResposta> corpoInvalido(HttpMessageNotReadableException ex) {
+        return montar(HttpStatus.BAD_REQUEST, "Corpo da requisição inválido", List.of());
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErroResposta> tipoInvalido(MethodArgumentTypeMismatchException ex) {
+        return montar(HttpStatus.BAD_REQUEST,
+            "Valor inválido para o parâmetro '" + ex.getName() + "'", List.of());
+    }
+
+    @ExceptionHandler(InvalidDataAccessApiUsageException.class)
+    public ResponseEntity<ErroResposta> ordenacaoInvalida(InvalidDataAccessApiUsageException ex) {
+        return montar(HttpStatus.BAD_REQUEST,
+            "Parâmetro de consulta inválido (verifique o campo de ordenação)", List.of());
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)

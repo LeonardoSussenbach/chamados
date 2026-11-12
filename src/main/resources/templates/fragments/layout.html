@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+
+<head th:fragment="head(titulo)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${titulo} + ' · Sistema de Chamados'">Sistema de Chamados</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+
+<body>
+
+<header th:fragment="nav(ativo)" class="topo">
+    <div class="topo-inner">
+        <a class="marca" th:href="@{/app}">Sistema de Chamados</a>
+        <nav class="menu">
+            <a th:href="@{/app}" th:classappend="${ativo == 'dashboard'} ? 'ativo'">Dashboard</a>
+            <a th:href="@{/app/chamados}" th:classappend="${ativo == 'chamados'} ? 'ativo'">Chamados</a>
+            <a th:href="@{/app/clientes}" th:classappend="${ativo == 'clientes'} ? 'ativo'">Clientes</a>
+            <a th:href="@{/app/categorias}" th:classappend="${ativo == 'categorias'} ? 'ativo'">Categorias</a>
+            <a th:href="@{/app/tecnicos}" th:classappend="${ativo == 'tecnicos'} ? 'ativo'">Técnicos</a>
+        </nav>
+    </div>
+</header>
+
+<div th:fragment="alertas">
+    <div class="alerta sucesso" th:if="${sucesso}" th:text="${sucesso}"></div>
+    <div class="alerta erro" th:if="${erro}" th:text="${erro}"></div>
+</div>
+
+<span th:fragment="status(s)" class="badge" th:classappend="'st-' + ${s}"
+      th:text="${#strings.replace(s, '_', ' ')}"></span>
+
+<span th:fragment="prioridade(p)" class="badge" th:classappend="'pr-' + ${p}"
+      th:text="${p}"></span>
+
+</body>
+</html>

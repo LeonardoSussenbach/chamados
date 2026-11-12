@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head th:replace="~{fragments/layout :: head('Técnicos')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('tecnicos')}"></header>
+
+<main class="container">
+    <div th:replace="~{fragments/layout :: alertas}"></div>
+
+    <div class="cabecalho">
+        <h1>Técnicos</h1>
+        <a class="btn" th:href="@{/app/tecnicos/novo}">+ Novo técnico</a>
+    </div>
+
+    <div class="card tabela-wrap">
+        <table>
+            <thead>
+            <tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th></th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="t : ${tecnicos}">
+                <td th:text="${t.nome()}">Nome</td>
+                <td th:text="${t.email()}">email</td>
+                <td><span class="badge" th:text="${t.perfil()}">TECNICO</span></td>
+                <td class="acoes">
+                    <a class="btn secundario pequeno" th:href="@{/app/tecnicos/{id}/editar(id=${t.id()})}">Editar</a>
+                    <form class="inline" method="post" th:action="@{/app/tecnicos/{id}/excluir(id=${t.id()})}"
+                          onsubmit="return confirm('Excluir este técnico?')">
+                        <button type="submit" class="btn perigo pequeno">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(tecnicos)}">
+                <td colspan="4" class="vazio">Nenhum técnico cadastrado.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+</body>
+</html>

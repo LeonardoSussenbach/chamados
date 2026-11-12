@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head th:replace="~{fragments/layout :: head('Dashboard')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('dashboard')}"></header>
+
+<main class="container">
+    <div th:replace="~{fragments/layout :: alertas}"></div>
+
+    <div class="cabecalho">
+        <div>
+            <h1>Dashboard</h1>
+            <p class="subtitulo">Visão geral dos chamados</p>
+        </div>
+        <a class="btn" th:href="@{/app/chamados/novo}">+ Abrir chamado</a>
+    </div>
+
+    <div class="numeros">
+        <a class="numero" th:each="e : ${porStatus}" th:href="@{/app/chamados(status=${e.key})}">
+            <span class="valor" th:text="${e.value}">0</span>
+            <span th:replace="~{fragments/layout :: status(${e.key})}"></span>
+        </a>
+    </div>
+
+    <div class="grade">
+        <div class="card">
+            <h2>Por prioridade</h2>
+            <table>
+                <tbody>
+                <tr th:each="e : ${porPrioridade}">
+                    <td><span th:replace="~{fragments/layout :: prioridade(${e.key})}"></span></td>
+                    <td class="acoes">
+                        <a th:href="@{/app/chamados(prioridade=${e.key})}" th:text="${e.value}">0</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="card">
+            <h2>Cadastros</h2>
+            <table>
+                <tbody>
+                <tr><td>Clientes</td><td class="acoes"><a th:href="@{/app/clientes}" th:text="${totalClientes}">0</a></td></tr>
+                <tr><td>Categorias</td><td class="acoes"><a th:href="@{/app/categorias}" th:text="${totalCategorias}">0</a></td></tr>
+                <tr><td>Técnicos</td><td class="acoes"><a th:href="@{/app/tecnicos}" th:text="${totalTecnicos}">0</a></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Chamados recentes</h2>
+        <div class="tabela-wrap">
+            <table>
+                <thead>
+                <tr><th>#</th><th>Título</th><th>Cliente</th><th>Prioridade</th><th>Status</th><th>Abertura</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="c : ${recentes}">
+                    <td th:text="${c.id()}">1</td>
+                    <td><a th:href="@{/app/chamados/{id}(id=${c.id()})}" th:text="${c.titulo()}">Título</a></td>
+                    <td th:text="${c.clienteNome()}">Cliente</td>
+                    <td><span th:replace="~{fragments/layout :: prioridade(${c.prioridade()})}"></span></td>
+                    <td><span th:replace="~{fragments/layout :: status(${c.status()})}"></span></td>
+                    <td th:text="${#temporals.format(c.dataAbertura(), 'dd/MM/yyyy HH:mm')}">--</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(recentes)}">
+                    <td colspan="6" class="vazio">Nenhum chamado aberto ainda.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+</body>
+</html>

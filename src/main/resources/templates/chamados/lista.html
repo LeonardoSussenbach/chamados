@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head th:replace="~{fragments/layout :: head('Chamados')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: nav('chamados')}"></header>
+
+<main class="container">
+    <div th:replace="~{fragments/layout :: alertas}"></div>
+
+    <div class="cabecalho">
+        <h1>Chamados</h1>
+        <a class="btn" th:href="@{/app/chamados/novo}">+ Abrir chamado</a>
+    </div>
+
+    <form class="card filtros" method="get" th:action="@{/app/chamados}">
+        <div class="campo">
+            <label for="status">Status</label>
+            <select id="status" name="status">
+                <option value="">Todos</option>
+                <option th:each="s : ${statusLista}" th:value="${s}"
+                        th:text="${#strings.replace(s, '_', ' ')}" th:selected="${s == status}"></option>
+            </select>
+        </div>
+        <div class="campo">
+            <label for="prioridade">Prioridade</label>
+            <select id="prioridade" name="prioridade">
+                <option value="">Todas</option>
+                <option th:each="p : ${prioridades}" th:value="${p}" th:text="${p}"
+                        th:selected="${p == prioridade}"></option>
+            </select>
+        </div>
+        <div class="campo">
+            <label for="clienteId">Cliente</label>
+            <select id="clienteId" name="clienteId">
+                <option value="">Todos</option>
+                <option th:each="c : ${clientes}" th:value="${c.id()}" th:text="${c.nome()}"
+                        th:selected="${c.id() == clienteId}"></option>
+            </select>
+        </div>
+        <div class="botoes">
+            <button type="submit" class="btn">Filtrar</button>
+            <a class="btn secundario" th:href="@{/app/chamados}">Limpar</a>
+        </div>
+    </form>
+
+    <div class="card">
+        <div class="tabela-wrap">
+            <table>
+                <thead>
+                <tr><th>#</th><th>Título</th><th>Cliente</th><th>Categoria</th><th>Técnico</th>
+                    <th>Prioridade</th><th>Status</th><th>Abertura</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="c : ${pagina.content}">
+                    <td th:text="${c.id()}">1</td>
+                    <td><a th:href="@{/app/chamados/{id}(id=${c.id()})}" th:text="${c.titulo()}">Título</a></td>
+                    <td th:text="${c.clienteNome()}">Cliente</td>
+                    <td th:text="${c.categoriaNome()}">Categoria</td>
+                    <td th:text="${c.tecnicoNome() ?: '—'}">Técnico</td>
+                    <td><span th:replace="~{fragments/layout :: prioridade(${c.prioridade()})}"></span></td>
+                    <td><span th:replace="~{fragments/layout :: status(${c.status()})}"></span></td>
+                    <td th:text="${#temporals.format(c.dataAbertura(), 'dd/MM/yyyy HH:mm')}">--</td>
+                </tr>
+                <tr th:if="${pagina.empty}">
+                    <td colspan="8" class="vazio">Nenhum chamado encontrado.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="paginacao" th:if="${pagina.totalPages > 1}">
+            <a class="btn secundario pequeno" th:if="${pagina.hasPrevious()}"
+               th:href="@{/app/chamados(status=${status},prioridade=${prioridade},clienteId=${clienteId},page=${pagina.number - 1})}">‹ Anterior</a>
+            <span class="info"
+                  th:text="'Página ' + ${pagina.number + 1} + ' de ' + ${pagina.totalPages} + ' · ' + ${pagina.totalElements} + ' chamados'"></span>
+            <a class="btn secundario pequeno" th:if="${pagina.hasNext()}"
+               th:href="@{/app/chamados(status=${status},prioridade=${prioridade},clienteId=${clienteId},page=${pagina.number + 1})}">Próxima ›</a>
+        </div>
+    </div>
+</main>
+</body>
+</html>
